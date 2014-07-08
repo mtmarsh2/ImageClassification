@@ -7,8 +7,8 @@ function [ category_list ] = list_by_similarity( distances, images  )
 [num_images, ~] = size(images);
 category_map = containers.Map();
 for i=1:num_images
-    
-    category = strsplit(images(i).name, '/');
+   
+    category = strsplit(images{i}, '/');
     category = category(1);
     category = category{1};
     if ~isKey(category_map, category)
@@ -29,7 +29,7 @@ for i=1:num_categories
     category_list{i,2} = category_map(category{1});
 end
 category_list = sortrows(category_list, (-2));
-
+top_category = category_list(1,1);
 end
 
 

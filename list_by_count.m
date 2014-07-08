@@ -1,4 +1,4 @@
-function [ category_list ] = list_by_count( images  )
+function [ top_category ] = list_by_count( images  )
 
 %find best category by summing up the count of images represented by each
 %category in the list passed in, then deems the one with the most votes as
@@ -8,7 +8,7 @@ function [ category_list ] = list_by_count( images  )
 category_map = containers.Map();
 for i=1:num_images
     
-    category = strsplit(images(i).name, '/');
+    category = strsplit(images{i}, '/');
     category = category(1);
     category = category{1};
     if ~isKey(category_map, category)
@@ -29,6 +29,6 @@ for i=1:num_categories
     category_list{i,2} = category_map(category{1});
 end
 category_list = sortrows(category_list, (-2));
-
+top_category = category_list(1,1);
 end
 
