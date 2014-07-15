@@ -1,4 +1,4 @@
-function [ predicted_category ] = test_categorization_euclidean( target_image_name, list_of_images, num_clusters, method )
+function [ predicted_category ] = test_categorization_euclidean( target_image_name, list_of_images, global_sift_descriptors, num_clusters, method )
 %Takes in target image, list of images and 
 
 %%
@@ -19,42 +19,43 @@ end
 %2. find features, descriptors in images and save them into global matrix
 %%
 
-global_sift_descriptors = [];
+
 global_image_histograms = zeros(num_images, num_clusters);
-image_sift_indexes = 1;
-for i=1:numel(list_of_images)
-	%image_sift_indexes = [image_sift_indexes size(global_sift_descriptors)];
-	image = imread(list_of_images{i});
-	if size(image,3) ~= 1
-		image = rgb2gray(image);
-	end
-	[f,d] = vl_sift(single(image));
-	%add descriptors to global matrix 
-	global_sift_descriptors = [global_sift_descriptors d(:,:)];
-end
 
 %3. use k means clustering on matrix
 global_sift_descriptors = double(global_sift_descriptors);
 [centers, assignments] = vl_kmeans(global_sift_descriptors, num_clusters);
-keyboard;
 
+%{
 %4. compute histogram vectors for each image
 for i=1:numel(list_of_images)
-    image = imread(list_of_images{i});
+    keyboard;
+    image = imread(list_of_images{i,1});
 	if(size(image,3) ~= 1)
 		image = rgb2gray(image);
 	end
 	[f,d] = vl_sift(single(image));
     [mins, indexs] = min( (vl_alldist(double(d), centers))');
     indexs = indexs';
-    keyboard;
     for j=1:size(indexs)
         global_image_histograms(i,indexs(j)) = global_image_histograms(i,indexs(j))  + 1;
     end
 end
-
+%}
 
 %5. compute histogram on target_image
+current_assignment_index = 1;
+for i=1:num_images
+    %get number of sift descriptors for current image
+    num_of_descriptors = size(list_of_images{i,2});
+    current_image_sif_descriptors = list_of_images{i,2};
+    [mins, indexs] = min( (vl_alldist(double(current_image_sif_descriptors), centers))');
+    current_assignment_index = current_assignment_index + num_of_descriptors;
+    indexs = indexs';
+    for j=1:size(indexs)
+        global_image_histograms(i,indexs(j)) = global_image_histograms(i,indexs(j))  + 1;
+    end
+end
 
 target_image_histogram = zeros(1, num_clusters);
 [tf, td] = vl_sift(single(target_image));
